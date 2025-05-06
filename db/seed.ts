@@ -1,9 +1,15 @@
 import '../load-env.js';
 import { db } from "./index";
 import * as schema from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 async function seed() {
+  try {
+    // Test database connection first
+    console.log("Testing database connection...");
+    const result = await db.execute(sql`SELECT NOW()`);
+    console.log("Database connection successful.");
+  
   try {
     console.log("Starting database seeding...");
 
