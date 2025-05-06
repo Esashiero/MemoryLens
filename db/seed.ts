@@ -1,3 +1,4 @@
+import '../load-env.js';
 import { db } from "./index";
 import * as schema from "@shared/schema";
 import { eq } from "drizzle-orm";
