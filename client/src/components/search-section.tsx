@@ -5,10 +5,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useMobile } from "@/hooks/use-mobile";
 import { apiRequest } from "@/lib/queryClient";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 export function SearchSection() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [isDateRangeOpen, setIsDateRangeOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState("Date Range");
   const isMobile = useMobile();
 
   const handleSearch = async () => {
@@ -31,11 +37,21 @@ export function SearchSection() {
     }
   };
 
+  // Handle filter click
+  const handleFilterClick = (filterName: string) => {
+    setActiveFilter(filterName);
+    
+    if (filterName === "Date Range") {
+      setIsDateRangeOpen(true);
+    }
+    // Handle other filter types as needed
+  };
+
   const filterOptions = [
-    { name: "Date Range", icon: "calendar_today", active: true },
-    { name: "Data Sources", icon: "layers", active: false },
-    { name: "Relevance", icon: "sort", active: false },
-    { name: "Tags", icon: "label", active: false },
+    { name: "Date Range", icon: "calendar_today" },
+    { name: "Data Sources", icon: "layers" },
+    { name: "Relevance", icon: "sort" },
+    { name: "Tags", icon: "label" },
   ];
 
   return (
@@ -71,19 +87,68 @@ export function SearchSection() {
                 <span className="text-secondary-500 dark:text-secondary-400">Filter by: </span>
               </div>
               {filterOptions.map((filter) => (
-                <Button
-                  key={filter.name}
-                  variant="outline"
-                  size="sm"
-                  className={`inline-flex items-center rounded-full text-xs ${
-                    filter.active 
-                      ? "bg-primary-100 text-primary-800 border-primary-200 hover:bg-primary-200 dark:bg-primary-900 dark:text-primary-300 dark:border-primary-800" 
-                      : "bg-secondary-100 text-secondary-800 border-secondary-200 hover:bg-secondary-200 dark:bg-secondary-800 dark:text-secondary-300 dark:border-secondary-700"
-                  }`}
-                >
-                  <span className="material-icons text-sm mr-1">{filter.icon}</span>
-                  {!isMobile && filter.name}
-                </Button>
+                filter.name === "Date Range" ? (
+                  <Popover key={filter.name} open={isDateRangeOpen} onOpenChange={setIsDateRangeOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleFilterClick(filter.name)}
+                        className={`inline-flex items-center rounded-full text-xs ${
+                          activeFilter === filter.name 
+                            ? "bg-primary-100 text-primary-800 border-primary-200 hover:bg-primary-200 dark:bg-primary-900 dark:text-primary-300 dark:border-primary-800" 
+                            : "bg-secondary-100 text-secondary-800 border-secondary-200 hover:bg-secondary-200 dark:bg-secondary-800 dark:text-secondary-300 dark:border-secondary-700"
+                        }`}
+                      >
+                        <span className="material-icons text-sm mr-1">{filter.icon}</span>
+                        {!isMobile && filter.name}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <div className="p-4">
+                        <Calendar
+                          mode="single"
+                          selected={selectedDate}
+                          onSelect={setSelectedDate}
+                          className="rounded-md border"
+                        />
+                        <div className="mt-4 flex justify-end space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIsDateRangeOpen(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              setIsDateRangeOpen(false);
+                              // Apply date filter logic here
+                            }}
+                          >
+                            Apply
+                          </Button>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                ) : (
+                  <Button
+                    key={filter.name}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleFilterClick(filter.name)}
+                    className={`inline-flex items-center rounded-full text-xs ${
+                      activeFilter === filter.name 
+                        ? "bg-primary-100 text-primary-800 border-primary-200 hover:bg-primary-200 dark:bg-primary-900 dark:text-primary-300 dark:border-primary-800" 
+                        : "bg-secondary-100 text-secondary-800 border-secondary-200 hover:bg-secondary-200 dark:bg-secondary-800 dark:text-secondary-300 dark:border-secondary-700"
+                    }`}
+                  >
+                    <span className="material-icons text-sm mr-1">{filter.icon}</span>
+                    {!isMobile && filter.name}
+                  </Button>
+                )
               ))}
             </div>
           </div>

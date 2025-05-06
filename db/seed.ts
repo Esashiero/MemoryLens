@@ -9,8 +9,6 @@ async function seed() {
     console.log("Testing database connection...");
     const result = await db.execute(sql`SELECT NOW()`);
     console.log("Database connection successful.");
-  
-  try {
     console.log("Starting database seeding...");
 
     // 1. Create a default user
